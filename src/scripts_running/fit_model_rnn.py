@@ -15,7 +15,7 @@ cls_model = ModelRnnSeparateTimestepsJsu
 
 
 weight_mse = 10.
-n_epochs = 100
+n_epochs = 1
 
 n_units = 10  # best trial 35
 dropout = 0.0001  # best trial 35

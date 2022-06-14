@@ -22,7 +22,10 @@ omit_invalid_datapoints = True
 cls = ModelRnnSeparateTimestepsJsu
 n_samples_predict = 60
 
+# higher is better, but constrained by computational resources.
+#   n_epochs should correspond to the value for fitting the final model.
 n_epochs = 100
+n_trials = 50
 
 range_n_units = [0, 100]
 range_dropout = [0., 0.9]
@@ -88,10 +91,12 @@ for use_rain_forecasts in [True, False]:
             bool_valid_train
         )[CRITERIA_BIC]
 
+        print(f'BIC with {n_units} units and {dropout} dropout: {bic}')
+
         return bic
 
     study = optuna.create_study(direction='minimize')
-    study.optimize(train, n_trials=100)
+    study.optimize(train, n_trials=n_trials)
 
     print("Number of finished trials: ", len(study.trials))
 

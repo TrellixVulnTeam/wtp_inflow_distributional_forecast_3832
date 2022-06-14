@@ -1,4 +1,4 @@
-from code.inflow_forecast.model.gamlss.model_gamlss_base import ModelGamlssBase
+from src.inflow_forecast.model.gamlss.model_gamlss_base import ModelGamlssBase
 
 from tensorflow_probability import distributions as tfd
 import tensorflow as tf

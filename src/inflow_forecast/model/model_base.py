@@ -500,27 +500,27 @@ class ModelBase:
 
     @classmethod
     def model_from_file(cls, filepath, *args, **kwargs):
-        def all_subclasses(cls):
-            result = {}
-            for subclass in cls.__subclasses__():
-                result[subclass.__name__] = subclass
-                result = {
-                    **result,
-                    subclass.__name__: subclass,
-                    **all_subclasses(subclass)
-                }
-
-            return result
+        # def all_subclasses(cls):
+        #     result = {}
+        #     for subclass in cls.__subclasses__():
+        #         result[subclass.__name__] = subclass
+        #         result = {
+        #             **result,
+        #             subclass.__name__: subclass,
+        #             **all_subclasses(subclass)
+        #         }
+        #
+        #     return result
 
         with open(filepath) as f:
             model_json = json.load(f)
 
-        name_class = model_json[KWARGS_MODEL]['class_model']
-        class_model = all_subclasses(cls)[name_class]
+        # name_class = model_json[KWARGS_MODEL]['class_model']
+        # class_model = all_subclasses(cls)[name_class]
 
         model_deserialized = json_to_params(model_json, np.asarray)
-        model_deserialized_w_kwargs = class_model.process_kwargs_from_file(model_deserialized, *args, **kwargs)
-        model = class_model(**model_deserialized_w_kwargs[KWARGS_MODEL])
+        model_deserialized_w_kwargs = cls.process_kwargs_from_file(model_deserialized, *args, **kwargs)
+        model = cls(**model_deserialized_w_kwargs[KWARGS_MODEL])
         model.setup_loading_file_subclass(filepath)
 
         return model
@@ -2428,8 +2428,8 @@ class ModelBase:
                                     min_lag_variable_use = min_lag_variable
 
                                 lags_use = list(range(min_lag_variable_use, max_lag_variable + 1))
-                                if name_variable == variable_target and lags_target_additional is not None:
-                                    lags_use.extend(lags_target_additional)
+                                if name_variable == variable_target and lags_target_additional:
+                                    lags_use = sorted( lags_use + [lag_ for lag_ in lags_target_additional if lag_ not in lags_use])
                                 for lag in lags_use:
                                     # only include valid lags.
                                     if (

@@ -117,10 +117,7 @@ def fit_model(
 cls_model = ModelGamlssJsu
 
 dir_models_point = os.path.join(dir_models, ModelPointBase.__name__)
-dir_save_models = os.path.join(dir_models, cls_model.__name__)
-
-if not os.path.exists(dir_save_models):
-    os.makedirs(dir_save_models)
+dir_save_models = get_path_make_dir(dir_models, cls_model.__name__)
 
 names_include_exclusive = []
 models_exclude = []
@@ -129,6 +126,8 @@ names_models_point = [
     name_
     for name_ in os.listdir(dir_models_point) if 'shrunken' in name_ and name_ not in models_exclude
 ] if not names_include_exclusive else names_include_exclusive
+
+n_iters = 20000
 
 n_iters = 20000
 n_iters_per_param = 3
@@ -193,14 +192,12 @@ kwargs_optimizer = [
     },
 ]
 
-cols_nm = ['NMS1302 Weiden [mm/min]']
-
 
 for name_model_point in names_models_point:
     name_model_save = f'{name_model_point[:-5]}_fmse={factor_mse}_niters={n_iters}_warm={warm_start}_lbda={lambda_lasso}.json'
 
     path_model_point = os.path.join(dir_models_point, name_model_point)
-    path_save_model = get_path_make_dir(dir_save_models, name_model_save)
+    path_save_model = os.path.join(dir_save_models, name_model_save)
 
     use_future_rain = 'furain_True' in name_model_point
     use_rain_forecasts = 'rfore_True' in name_model_point
@@ -218,7 +215,7 @@ for name_model_point in names_models_point:
         date_end_test,
         name_column_inflow,
         variables_external,
-        cols_nm,
+        [name_column_rain_history],
         kwargs_optimizer,
         class_optimizer,
         n_iters,

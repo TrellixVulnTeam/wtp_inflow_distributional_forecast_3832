@@ -155,7 +155,7 @@ def get_data(
 
             columns_forecast[KEY_RAIN_CUMULATED] = columns_forecast_cumulated
 
-        use_raw_rain = keep_raw_rain and steps_cumulate_rain is None
+        use_raw_rain = keep_raw_rain or steps_cumulate_rain is None
         if use_raw_rain:
             columns_forecast[COL_RAIN_RAW] = columns_forecasts_rain
 

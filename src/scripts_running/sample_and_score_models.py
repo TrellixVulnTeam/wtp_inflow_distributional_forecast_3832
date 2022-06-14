@@ -13,11 +13,13 @@ from src.config_variables import *
 
 from src.constants.misc  import *
 import pandas as pd
-
+from src.common_functions.load_model import load_model_file_get_class
 
 
 OMIT_INVALID = True
 N_SAMPLES = 60
+
+skip_already_sampled = True
 
 only_datetimes=False
 
@@ -55,12 +57,7 @@ def sample_score_model(
         n_samples=80,
         omit_invalid=True
         ):
-
-    # TODO: load from file with auto model detection
-    model = ModelBase.model_from_file(
-                    path_model
-                )
-
+    model = load_model_file_get_class(path_model)
     variables_use = {column_predict, *variables_external}
 
     data_train, data_test, columns_forecasts_rain = get_data(
@@ -214,8 +211,8 @@ def sample_score_model(
 for name_class_model in os.listdir(dir_models):
     dir_models_ = os.path.join(dir_models, name_class_model)
     for filename_model in os.listdir(dir_models_):
-        filename_train = filename_model[:-5] + f'{SUFFIX_TRAIN}.json'
-        filename_test = filename_model[:-5] + f'{SUFFIX_TEST}.json'
+        filename_train = filename_model[:-5] + f'_{SUFFIX_TRAIN}.json'
+        filename_test = filename_model[:-5] + f'_{SUFFIX_TEST}.json'
 
         dir_samples_model = get_path_make_dir(dir_samples, name_class_model)
         dir_truth_model = get_path_make_dir(dir_truth, name_class_model)
@@ -248,14 +245,16 @@ for name_class_model in os.listdir(dir_models):
         use_future_rain = 'furain_True' in filename_model
         use_rain_forecasts = 'rfore_True' in filename_model
 
-        print(f'Sampling and scoring model {filename_model}')
 
-        if os.path.isfile(path_save_datetimes_x_test ):
+        path_model = os.path.join(dir_models_, filename_model)
+        print(f'Sampling and scoring model {path_model}')
+
+        if os.path.isfile(path_save_datetimes_x_test ) and skip_already_sampled:
             print(f'skipping {filename_model} because it exists')
             continue
 
         sample_score_model(
-            os.path.join(dir_models, filename_model),
+            path_model,
             path_save_scores_timesteps_train,
             path_save_scores_timesteps_test,
             path_save_scores_datapoints_train,

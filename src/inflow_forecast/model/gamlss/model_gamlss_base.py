@@ -6,10 +6,9 @@ import pandas as pd
 from tqdm import tqdm
 import json
 from tensorflow_probability import distributions as tfd
-import tempfile
 import tensorboard as tb
 from copy import deepcopy
-import os
+import timeit
 
 from src.inflow_forecast.model.model_base import ModelBase
 from src.common_functions.misc import json_to_params
@@ -341,9 +340,6 @@ class ModelGamlssBase(ModelBase):
         else:
             n_iters_use = n_iters
 
-        if self.path_tensorboard is not None:
-            self.launch_tensorboard()
-
         if not warm_start or self.params_tf is None:
             self.set_default_params_fitted()
         else:
@@ -619,8 +615,6 @@ class ModelGamlssBase(ModelBase):
 
 
     def get_log_likelihood(self, data: pd.DataFrame, bool_datapoints_valid=None):
-        self.logger.warning('get_log_likelihood(): MUST RESPECT DATA NANS INVALID!!!')
-
         x, y, datetimes_x = self.make_x_y(data, True)
         y = self.slice_tensor_sample_predictions(y)
         y_scaled = (y-self.mean_scaling_y) / self.std_scaling_y
@@ -629,8 +623,6 @@ class ModelGamlssBase(ModelBase):
                                                                omit_unknown_future_truth=True)
         indices_valid = self.get_indices_datapoints_history_valid(bool_x_valid, True)
 
-
-        # FIXME: self.y is 1d, right?
         predictions_previous = tf.unstack(
             y_scaled,
             axis=1)

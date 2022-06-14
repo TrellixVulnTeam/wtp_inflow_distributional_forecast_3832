@@ -4,7 +4,7 @@ import math
 import numpy as np
 import matplotlib.patches as mpatches
 import os
-from code.common_functions.misc import load_json_gzip, json_to_params, make_dir_if_missing
+from src.common_functions.misc import load_json_gzip, json_to_params, make_dir_if_missing
 import pickle
 import json
 from tensorflow_graphics.math.interpolation import bspline
