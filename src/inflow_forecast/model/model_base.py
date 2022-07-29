@@ -1006,9 +1006,11 @@ class ModelBase:
         data_columns_needed = data[self.columns_needed] if self.columns_needed is not None else data
         x = data_columns_needed.to_numpy(dtype=self.DTYPE)
 
-        # remark: important to ensure nanoseconds unit.
-        #   especially when working with time deltas, which must be ns too.
-        datetimes_x = data_columns_needed.index.to_numpy().astype('datetime64[ns]')
+        #   localize with None makes datetimes naive, but with local time values.
+        #   this way, daylight saving issues are circumvenced because local time is the
+        #   relevant time for diurnal inflow patterns.
+        #   REMARK/ATTENTION: This fix is only valid for modelling seasonality that follows local time!!!
+        datetimes_x = data_columns_needed.index.tz_localize(None).to_numpy().astype('datetime64[ns]')
 
         # y is x of target column for future
         y = np.ndarray((x.shape[0], self.n_steps_forecast_horizon), dtype=self.DTYPE)

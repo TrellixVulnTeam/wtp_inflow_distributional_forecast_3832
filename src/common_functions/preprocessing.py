@@ -133,6 +133,9 @@ def preprocess_data_realtime(
         data_processed = fix_daylight_saving(data)
     else:
         data_processed = data.copy(True)
+        # Provide correct timezone.
+        data_processed.index = data_processed.index.tz_localize(pytz.UTC)
+        data_processed.index = data_processed.index.tz_convert(pytz.timezone('Europe/Berlin'))
 
     # get booleans of constant phases to insert nans.
     #   must be done here before any other filling occurs, as cosntant values / ffill of other data
