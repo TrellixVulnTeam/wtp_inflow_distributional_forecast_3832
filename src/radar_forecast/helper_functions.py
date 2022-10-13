@@ -105,7 +105,26 @@ def make_predictions_rain_rasters_dir(path_dir, n_steps_predict, filepath_output
 def extract_dwd_tar(filepath, dir_output):
     print('Extracting')
     with tarfile.open(filepath, 'r:gz') as zip_:
-        zip_.extractall(dir_output)
+        def is_within_directory(directory, target):
+            
+            abs_directory = os.path.abspath(directory)
+            abs_target = os.path.abspath(target)
+        
+            prefix = os.path.commonprefix([abs_directory, abs_target])
+            
+            return prefix == abs_directory
+        
+        def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+        
+            for member in tar.getmembers():
+                member_path = os.path.join(path, member.name)
+                if not is_within_directory(path, member_path):
+                    raise Exception("Attempted Path Traversal in Tar File")
+        
+            tar.extractall(path, members, numeric_owner=numeric_owner) 
+            
+        
+        safe_extract(zip_, dir_output)
     print('extracted files')
 
     filenames = [f for f in sorted(os.listdir(dir_output))]
@@ -136,9 +155,47 @@ def make_predictions_rain_rasters_dir_compressed(path_dir, n_steps_predict, fn_m
             print('created temporary directory', tmpdirname)
             print('Extracting')
             with tarfile.open(paths_archives[idx], 'r:gz') as zip_:
-                zip_.extractall(tmpdirname)
+                def is_within_directory(directory, target):
+                    
+                    abs_directory = os.path.abspath(directory)
+                    abs_target = os.path.abspath(target)
+                
+                    prefix = os.path.commonprefix([abs_directory, abs_target])
+                    
+                    return prefix == abs_directory
+                
+                def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+                
+                    for member in tar.getmembers():
+                        member_path = os.path.join(path, member.name)
+                        if not is_within_directory(path, member_path):
+                            raise Exception("Attempted Path Traversal in Tar File")
+                
+                    tar.extractall(path, members, numeric_owner=numeric_owner) 
+                    
+                
+                safe_extract(zip_, tmpdirname)
             with tarfile.open(paths_archives[idx+1], 'r:gz') as zip_:
-                zip_.extractall(tmpdirname)
+                def is_within_directory(directory, target):
+                    
+                    abs_directory = os.path.abspath(directory)
+                    abs_target = os.path.abspath(target)
+                
+                    prefix = os.path.commonprefix([abs_directory, abs_target])
+                    
+                    return prefix == abs_directory
+                
+                def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+                
+                    for member in tar.getmembers():
+                        member_path = os.path.join(path, member.name)
+                        if not is_within_directory(path, member_path):
+                            raise Exception("Attempted Path Traversal in Tar File")
+                
+                    tar.extractall(path, members, numeric_owner=numeric_owner) 
+                    
+                
+                safe_extract(zip_, tmpdirname)
             print('extracted files')
 
             filenames = [f for f in sorted(os.listdir(tmpdirname)) if f not in files_past_last_iter]
